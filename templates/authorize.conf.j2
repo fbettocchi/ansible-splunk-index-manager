@@ -1,0 +1,4 @@
+[role_{{item.name}}]
+srchIndexesDefault = {{index_prefix}}standard_index;{{index_prefix}}metrics_index;{% if item.indexes is defined %}{% for index in item.indexes %}{{index_prefix}}{{index.name}};{% endfor %}{% endif %}
+
+srchIndexesAllowed = {{index_prefix}}standard_index;{{index_prefix}}metrics_index;{% if item.indexes is defined %}{% for index in item.indexes %}{{index_prefix}}{{index.name}};{% endfor %}{% endif %}

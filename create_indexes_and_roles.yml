@@ -1,0 +1,46 @@
+---
+- name: Manage indexes and roles for customers
+  hosts: clustermanager
+  connection: local
+  vars:
+    indexes_destination_path: "./to_deploy_to_clustermanager"
+  tasks:
+    - name: Read customers file and decode JSON
+      slurp: 
+        src: ./customers.json
+      register: customers_file
+
+    - name: Load JSON content into variable
+      set_fact:
+        customer_list: "{{ customers_file.content | b64decode | from_json }}"
+
+    - name: Create folders for each customer if not exist
+      ansible.builtin.file:
+        path: "{{ indexes_destination_path }}/{{ item.name.lower() }}/local"
+        state: directory
+      loop: "{{ customer_list.customers }}"
+
+    - name: Create indexes.conf for each customer
+      template:
+        src: indexes.conf.j2
+        dest: "{{ indexes_destination_path }}/{{ item.name.lower() }}/local/indexes.conf"
+      loop: "{{ customer_list.customers }}"
+
+    - name: Create authorize.conf for each customer
+      template:
+        src: authorize.conf.j2
+        dest: "{{ indexes_destination_path }}/{{ item.name.lower() }}/local/authorize.conf"
+      loop: "{{ customer_list.customers }}"
+
+    - name: Find customers directories not in the list
+      ansible.builtin.find:
+        paths: "{{ indexes_destination_path }}"
+        file_type: directory
+        excludes: "{{ customer_list.customers | map(attribute='name') | map('lower') }}"
+      register: customers_to_delete
+
+    - name: Delete customers directories that are not in the list
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        state: absent
+      loop: "{{ customers_to_delete.files }}"

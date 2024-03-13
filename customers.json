@@ -1,0 +1,20 @@
+{
+    "customers": [
+        {
+            "name": "first_customer",
+            "indexes": [{
+                "name": "main",
+                "params": [
+                    {"key":"key1","value":"value1"},
+                    {"key":"key2","value":"value2"}
+                ]
+            },
+            {
+                "name": "secondary"
+            }]
+        },
+        {
+            "name": "second_customer"
+        }
+    ]
+}
